@@ -1,0 +1,156 @@
+
+{% extends "base.html" %}
+
+{% block title %}Register | Rainfall Prediction{% endblock %}
+
+{% block content %}
+
+<style>
+.register-wrapper {
+    min-height: 75vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 35px 16px;
+    background: linear-gradient(135deg, #dbeafe, #cffafe);
+    border-radius: 20px;
+}
+
+.register-card {
+    width: 100%;
+    max-width: 460px;
+    padding: 30px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+}
+
+.register-card h1 {
+    text-align: center;
+    color: #0f172a;
+}
+
+.register-subtitle {
+    text-align: center;
+    color: #64748b;
+}
+
+.register-card label {
+    display: block;
+    margin: 16px 0 7px;
+    font-weight: bold;
+}
+
+.register-card input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 9px;
+    box-sizing: border-box;
+}
+
+.register-submit {
+    width: 100%;
+    margin-top: 24px;
+    padding: 13px;
+    border: none;
+    border-radius: 9px;
+    background: #2563eb;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.register-flash {
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 8px;
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.register-alt {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.register-alt a {
+    color: #2563eb;
+}
+</style>
+
+<div class="register-wrapper">
+    <div class="register-card">
+
+        <h1>🌦️ Create Your Account</h1>
+
+        <p class="register-subtitle">
+            Join us to explore rainfall predictions and weather insights.
+        </p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="register-flash" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('register') }}">
+
+            <label for="username">Username</label>
+            <input
+                id="username"
+                name="username"
+                type="text"
+                maxlength="100"
+                autocomplete="username"
+                required
+            >
+
+            <label for="email">Email address</label>
+            <input
+                id="email"
+                name="email"
+                type="email"
+                maxlength="254"
+                autocomplete="email"
+                required
+            >
+
+            <label for="password">Password</label>
+            <input
+                id="password"
+                name="password"
+                type="password"
+                minlength="8"
+                autocomplete="new-password"
+                required
+            >
+
+            <label for="confirm">Confirm password</label>
+            <input
+                id="confirm"
+                name="confirm"
+                type="password"
+                minlength="8"
+                autocomplete="new-password"
+                required
+            >
+
+            <button class="register-submit" type="submit">
+                Create Account →
+            </button>
+
+        </form>
+
+        <div class="register-alt">
+            Already have an account?
+            <a href="{{ url_for('login') }}">Log in</a>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

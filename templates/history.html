@@ -1,0 +1,463 @@
+{% extends "base.html" %}
+{% block title %}Prediction History — Rainfall Prediction{% endblock %}
+
+{% block content %}
+<style>
+.hx { max-width: 1100px; margin: 30px auto; padding: 0 16px 40px; }
+
+/* ---------- banner ---------- */
+.hx-banner {
+  background: linear-gradient(135deg, #075985 0%, #0ea5e9 100%);
+  color: #fff;
+  border-radius: 22px;
+  padding: 30px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  box-shadow: 0 12px 30px #07598533;
+  position: relative;
+  overflow: hidden;
+}
+.hx-banner::after {
+  content: "🌧️";
+  position: absolute;
+  right: 18px; bottom: -22px;
+  font-size: 110px;
+  opacity: .13;
+}
+.hx-banner h2 { margin: 0 0 6px; font-size: 28px; }
+.hx-banner p { margin: 0; opacity: .9; }
+.hx-btn {
+  display: inline-block;
+  padding: 11px 20px;
+  border-radius: 999px;
+  border: 0;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: none;
+  background: #fff;
+  color: #075985;
+  position: relative;
+  z-index: 1;
+  transition: transform .15s, box-shadow .15s;
+}
+.hx-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px #0003; }
+
+/* ---------- stat tiles ---------- */
+.hx-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 16px;
+  margin: 22px 0;
+}
+.hx-stat {
+  background: #fff;
+  border-radius: 18px;
+  padding: 18px 20px;
+  box-shadow: 0 6px 20px #12304712;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.hx-stat .ico {
+  width: 48px; height: 48px;
+  border-radius: 14px;
+  display: grid; place-items: center;
+  font-size: 24px;
+}
+.hx-stat .num { font-size: 26px; font-weight: 800; color: #0f172a; line-height: 1.1; }
+.hx-stat .lbl { font-size: 13px; color: #64748b; }
+.ico-blue { background: #e0f2fe; }
+.ico-red { background: #fee2e2; }
+.ico-green { background: #dcfce7; }
+.ico-purple { background: #ede9fe; }
+
+/* ---------- trend chart ---------- */
+.hx-chart {
+  background: #fff;
+  border-radius: 20px;
+  padding: 20px 22px 14px;
+  box-shadow: 0 6px 20px #12304712;
+  margin-bottom: 22px;
+}
+.hx-chart h3 { margin: 0 0 4px; color: #075985; font-size: 18px; }
+.hx-chart p { margin: 0 0 14px; color: #64748b; font-size: 13px; }
+.hx-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  height: 170px;
+  padding-top: 8px;
+  border-bottom: 2px solid #e2e8f0;
+  overflow-x: auto;
+}
+.hx-barcol {
+  flex: 1 0 34px;
+  max-width: 70px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+}
+.hx-barval { font-size: 11px; font-weight: bold; color: #475569; margin-bottom: 3px; }
+.hx-barfill {
+  width: 100%;
+  min-height: 5px;
+  border-radius: 10px 10px 0 0;
+  background: linear-gradient(180deg, #0ea5e9, #38bdf8);
+  transition: filter .15s;
+}
+.hx-barfill.alert { background: linear-gradient(180deg, #ef4444, #f97316); }
+.hx-barcol:hover .hx-barfill { filter: brightness(1.12); }
+.hx-barlabels {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+  overflow-x: auto;
+}
+.hx-barlabels span {
+  flex: 1 0 34px;
+  max-width: 70px;
+  text-align: center;
+  font-size: 11px;
+  color: #64748b;
+}
+.hx-legend { display: flex; gap: 16px; margin-top: 10px; font-size: 12px; color: #64748b; }
+.hx-legend i {
+  display: inline-block; width: 10px; height: 10px;
+  border-radius: 3px; margin-right: 5px;
+}
+
+/* ---------- toolbar ---------- */
+.hx-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 18px;
+}
+.hx-search {
+  flex: 1 1 240px;
+  padding: 12px 16px;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  font-size: 15px;
+  background: #fff;
+  box-sizing: border-box;
+}
+.hx-search:focus { outline: 2px solid #0ea5e9; border-color: transparent; }
+.hx-chip {
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
+  color: #334155;
+}
+.hx-chip.active { background: #075985; border-color: #075985; color: #fff; }
+.hx-clear {
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: 1px solid #fecaca;
+  background: #fff;
+  color: #b91c1c;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+}
+.hx-clear:hover { background: #fee2e2; }
+
+/* ---------- cards ---------- */
+.hx-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+.hx-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 6px 22px #12304714;
+  border-top: 6px solid #38bdf8;
+  transition: transform .18s, box-shadow .18s;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.hx-card:hover { transform: translateY(-4px); box-shadow: 0 14px 30px #12304722; }
+.hx-card.is-alert { border-top-color: #ef4444; }
+
+.hx-head { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+.hx-place { font-size: 17px; font-weight: 800; color: #0f172a; line-height: 1.3; }
+.hx-date { font-size: 12.5px; color: #64748b; margin-top: 3px; }
+
+.hx-badge {
+  padding: 4px 11px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: bold;
+  white-space: nowrap;
+}
+.hx-badge.alert { background: #fee2e2; color: #b91c1c; }
+.hx-badge.ok { background: #dcfce7; color: #166534; }
+
+.hx-main { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.hx-mm { font-size: 40px; font-weight: 800; color: #075985; line-height: 1; }
+.hx-mm small { font-size: 16px; font-weight: bold; color: #64748b; }
+.hx-level {
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: bold;
+  background: #e0f2fe;
+  color: #075985;
+}
+.lv-no-rain { background: #f1f5f9; color: #475569; }
+.lv-very-light { background: #e0f2fe; color: #0369a1; }
+.lv-light { background: #bae6fd; color: #075985; }
+.lv-moderate { background: #c7d2fe; color: #3730a3; }
+.lv-heavy { background: #ddd6fe; color: #5b21b6; }
+.lv-very-heavy { background: #fecaca; color: #b91c1c; }
+.lv-extremely-heavy { background: #ef4444; color: #fff; }
+
+.hx-bar-label {
+  display: flex; justify-content: space-between;
+  font-size: 12.5px; color: #64748b; margin-bottom: 6px;
+}
+.hx-bar { height: 10px; border-radius: 999px; background: #e2e8f0; overflow: hidden; }
+.hx-bar > span {
+  display: block; height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #38bdf8, #0ea5e9);
+}
+.hx-card.is-alert .hx-bar > span { background: linear-gradient(90deg, #f97316, #ef4444); }
+
+.hx-weather {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  text-align: center;
+}
+.hx-w {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 8px 2px;
+}
+.hx-w .e { font-size: 18px; }
+.hx-w .v { font-size: 13px; font-weight: bold; color: #0f172a; }
+.hx-w .u { font-size: 10.5px; color: #64748b; }
+
+.hx-foot { display: flex; justify-content: flex-end; }
+.hx-del {
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid #fecaca;
+  background: #fff;
+  color: #b91c1c;
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.hx-del:hover { background: #fee2e2; }
+
+/* ---------- empty ---------- */
+.hx-empty {
+  text-align: center;
+  background: #fff;
+  border-radius: 22px;
+  padding: 50px 20px;
+  box-shadow: 0 6px 22px #12304714;
+  color: #475569;
+}
+.hx-empty .big { font-size: 64px; }
+.hx-empty h3 { color: #075985; margin: 10px 0 6px; }
+#hxNone { display: none; text-align: center; color: #64748b; padding: 30px; }
+
+@media (max-width: 520px) {
+  .hx-banner { padding: 22px; }
+  .hx-banner h2 { font-size: 23px; }
+  .hx-mm { font-size: 34px; }
+}
+</style>
+
+<div class="hx">
+
+  <div class="hx-banner">
+    <div>
+      <h2>🕘 Prediction History</h2>
+      <p>Hi {{ username }}, here are your saved rainfall predictions.</p>
+    </div>
+    <a class="hx-btn" href="{{ url_for('prediction_page') }}">＋ New Prediction</a>
+  </div>
+
+  {% if records %}
+
+  <div class="hx-stats">
+    <div class="hx-stat">
+      <div class="ico ico-blue">📊</div>
+      <div><div class="num">{{ stats.total }}</div><div class="lbl">Total predictions</div></div>
+    </div>
+    <div class="hx-stat">
+      <div class="ico ico-red">⚠️</div>
+      <div><div class="num">{{ stats.alerts }}</div><div class="lbl">Alerts triggered</div></div>
+    </div>
+    <div class="hx-stat">
+      <div class="ico ico-green">💧</div>
+      <div><div class="num">{{ stats.average }} <small style="font-size:14px">mm</small></div><div class="lbl">Average rainfall</div></div>
+    </div>
+    <div class="hx-stat">
+      <div class="ico ico-purple">⛈️</div>
+      <div><div class="num">{{ stats.highest }} <small style="font-size:14px">mm</small></div><div class="lbl">Highest rainfall</div></div>
+    </div>
+  </div>
+
+  {% set chart = (records[:12])|reverse|list %}
+  <div class="hx-chart">
+    <h3>📈 Rainfall trend</h3>
+    <p>Your last {{ chart|length }} prediction{{ '' if chart|length == 1 else 's' }}, oldest to newest.</p>
+    <div class="hx-bars">
+      {% for r in chart %}
+      {% set top = stats.highest if stats.highest else 1 %}
+      {% set h = (r.predicted_rainfall / top * 100)|round|int %}
+      <div class="hx-barcol" title="{{ r.location }} — {{ r.predicted_rainfall }} mm">
+        <div class="hx-barval">{{ r.predicted_rainfall }}</div>
+        <div class="hx-barfill {{ 'alert' if r.alert else '' }}" data-height="{{ [h, 4]|max }}"></div>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="hx-barlabels">
+      {% for r in chart %}<span>{{ r.created_at[5:10] }}</span>{% endfor %}
+    </div>
+    <div class="hx-legend">
+      <span><i style="background:#0ea5e9"></i>Normal</span>
+      <span><i style="background:#ef4444"></i>Above alert limit</span>
+    </div>
+  </div>
+
+  <div class="hx-toolbar">
+    <input id="hxSearch" class="hx-search" type="search"
+           placeholder="🔍  Search by city, state or country...">
+    <button class="hx-chip active" data-filter="all" type="button">All</button>
+    <button class="hx-chip" data-filter="alert" type="button">⚠️ Alerts only</button>
+
+    <form method="POST" action="{{ url_for('clear_history') }}"
+          onsubmit="return confirm('Delete ALL your saved predictions?');">
+      <button class="hx-clear" type="submit">🗑 Clear all</button>
+    </form>
+  </div>
+
+  <div class="hx-grid" id="hxGrid">
+    {% for r in records %}
+    <div class="hx-card {{ 'is-alert' if r.alert else '' }}"
+         data-place="{{ r.location|lower }}"
+         data-alert="{{ '1' if r.alert else '0' }}">
+
+      <div class="hx-head">
+        <div>
+          <div class="hx-place">📍 {{ r.location }}</div>
+          <div class="hx-date">🕒 {{ r.created_at }}</div>
+        </div>
+        {% if r.alert %}
+          <span class="hx-badge alert">⚠️ Alert</span>
+        {% else %}
+          <span class="hx-badge ok">✔ Normal</span>
+        {% endif %}
+      </div>
+
+      <div class="hx-main">
+        <div class="hx-mm">{{ r.predicted_rainfall }} <small>mm</small></div>
+        <span class="hx-level lv-{{ r.level|lower|replace(' ', '-') }}">{{ r.level }}</span>
+      </div>
+
+      <div>
+        <div class="hx-bar-label">
+          <span>Alert limit</span>
+          <span>{{ r.alert_threshold if r.alert_threshold is not none else '-' }} mm</span>
+        </div>
+        <div class="hx-bar"><span data-width="{{ r.pct }}"></span></div>
+      </div>
+
+      <div class="hx-weather">
+        <div class="hx-w"><div class="e">🌡️</div><div class="v">{{ r.temperature }}</div><div class="u">°C</div></div>
+        <div class="hx-w"><div class="e">💧</div><div class="v">{{ r.humidity }}</div><div class="u">% hum.</div></div>
+        <div class="hx-w"><div class="e">🧭</div><div class="v">{{ r.pressure }}</div><div class="u">hPa</div></div>
+        <div class="hx-w"><div class="e">💨</div><div class="v">{{ r.wind_speed }}</div><div class="u">km/h</div></div>
+        <div class="hx-w"><div class="e">☁️</div><div class="v">{{ r.cloud_cover }}</div><div class="u">% cloud</div></div>
+      </div>
+
+      <div class="hx-foot">
+        <form method="POST"
+              action="{{ url_for('delete_history_record', record_id=r.id) }}"
+              onsubmit="return confirm('Delete this prediction?');">
+          <button class="hx-del" type="submit">Delete</button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <p id="hxNone">No predictions match your search.</p>
+
+  {% else %}
+
+  <div class="hx-empty" style="margin-top:22px">
+    <div class="big">🌦️</div>
+    <h3>No predictions yet</h3>
+    <p>Make your first rainfall prediction and it will appear here.</p>
+    <a class="hx-btn" style="background:#075985;color:#fff" href="{{ url_for('prediction_page') }}">Predict Rainfall</a>
+  </div>
+
+  {% endif %}
+</div>
+
+<script>
+(function () {
+  // Bar sizes (kept out of the HTML so editors do not flag the template).
+  document.querySelectorAll("[data-height]").forEach(el => {
+    el.style.height = el.dataset.height + "%";
+  });
+  document.querySelectorAll("[data-width]").forEach(el => {
+    el.style.width = el.dataset.width + "%";
+  });
+
+  const search = document.getElementById("hxSearch");
+  if (!search) return;
+
+  const cards = Array.from(document.querySelectorAll(".hx-card"));
+  const chips = Array.from(document.querySelectorAll(".hx-chip"));
+  const none = document.getElementById("hxNone");
+  let filter = "all";
+
+  function apply() {
+    const text = search.value.trim().toLowerCase();
+    let shown = 0;
+
+    cards.forEach(card => {
+      const okText = !text || card.dataset.place.includes(text);
+      const okFilter = filter === "all" || card.dataset.alert === "1";
+      const visible = okText && okFilter;
+      card.style.display = visible ? "" : "none";
+      if (visible) shown++;
+    });
+
+    none.style.display = shown ? "none" : "block";
+  }
+
+  search.addEventListener("input", apply);
+
+  chips.forEach(chip => {
+    chip.addEventListener("click", () => {
+      filter = chip.dataset.filter;
+      chips.forEach(c => c.classList.toggle("active", c === chip));
+      apply();
+    });
+  });
+})();
+</script>
+{% endblock %}

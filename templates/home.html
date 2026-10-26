@@ -1,0 +1,539 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home | Rainfall Prediction</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --blue: #1596ff;
+      --blue-light: #45baff;
+      --white: #f5f9ff;
+      --muted: #c5d8ed;
+      --panel: rgba(4, 25, 45, 0.82);
+      --border: rgba(87, 184, 255, 0.45);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: "Roboto", Arial, sans-serif;
+      color: var(--white);
+      background: #06182b;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button, a {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Rainy background and dark overlay */
+    .page-background {
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      background:
+        linear-gradient(
+          180deg,
+          rgba(2, 15, 30, 0.60),
+          rgba(2, 16, 32, 0.40) 50%,
+          rgba(2, 15, 30, 0.70)
+        ),
+        url("{{ url_for('static', filename='rain-bg.jpg') }}")
+        center center / cover no-repeat;
+      transform: scale(1.02);
+    }
+
+    /* Navigation bar */
+    .topbar {
+      min-height: 76px;
+      padding: 14px 5.5%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+      background: rgba(3, 20, 38, 0.88);
+      border-bottom: 1px solid rgba(86, 181, 255, 0.45);
+      backdrop-filter: blur(14px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 25px;
+      font-weight: 800;
+      letter-spacing: -0.6px;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      color: var(--blue-light);
+      flex-shrink: 0;
+    }
+
+    .brand span {
+      color: var(--blue);
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+
+    .nav a {
+      padding: 12px 3px;
+      color: #dce9f8;
+      font-size: 14px;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+
+    .nav a:hover,
+    .nav a.active {
+      color: var(--blue-light);
+    }
+
+    .nav a.active {
+      border-bottom: 3px solid var(--blue);
+    }
+
+    /* Main hero section */
+    .hero {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 95px 24px 105px;
+      text-align: center;
+    }
+
+    .eyebrow {
+      margin-bottom: 20px;
+      color: var(--blue-light);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 3px;
+    }
+
+    .hero h1 {
+      margin-bottom: 24px;
+      font-size: clamp(38px, 6vw, 70px);
+      line-height: 1.12;
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      text-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .hero h1 span {
+      color: var(--blue);
+    }
+
+    .hero-description {
+      max-width: 700px;
+      margin: 0 auto 32px;
+      color: #e1edf9;
+      font-size: 18px;
+      line-height: 1.8;
+    }
+
+    .welcome {
+      margin-bottom: 20px;
+      color: #d5e9ff;
+      font-size: 15px;
+    }
+
+    .primary-button {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      gap: 14px;
+      min-height: 58px;
+      padding: 16px 30px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      background: linear-gradient(110deg, #0879f9, #159dff);
+      color: white;
+      font-size: 16px;
+      font-weight: 700;
+      box-shadow: 0 8px 28px rgba(0, 120, 255, 0.3);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .primary-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px rgba(0, 120, 255, 0.45);
+    }
+
+    .button-icon {
+      width: 23px;
+      height: 23px;
+    }
+
+    /* Feature cards */
+    .features {
+      max-width: 1220px;
+      margin: -25px auto 0;
+      padding: 0 25px 65px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 24px;
+    }
+
+    .feature-card {
+      min-height: 270px;
+      padding: 28px 27px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      background: rgba(3, 25, 47, 0.83);
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(12px);
+      transition: transform 0.25s, background 0.25s;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-6px);
+      background: rgba(5, 34, 62, 0.94);
+    }
+
+    .feature-icon {
+      width: 62px;
+      height: 62px;
+      margin-bottom: 20px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: rgba(21, 150, 255, 0.25);
+      color: var(--blue-light);
+    }
+
+    .feature-icon svg {
+      width: 32px;
+      height: 32px;
+    }
+
+    .feature-card h2 {
+      margin-bottom: 12px;
+      font-size: 21px;
+      font-weight: 700;
+    }
+
+    .feature-card p {
+      margin-bottom: 22px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.7;
+      flex-grow: 1;
+    }
+
+    .learn-more {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--blue-light);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .learn-more:hover {
+      color: white;
+    }
+
+    /* Bottom strip */
+    .footer {
+      padding: 22px 5.5%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      background: rgba(3, 20, 38, 0.90);
+      border-top: 1px solid rgba(86, 181, 255, 0.35);
+      color: #d4e5f7;
+      font-size: 13px;
+    }
+
+    .footer-left,
+    .footer-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .footer-icon {
+      width: 23px;
+      height: 23px;
+      color: var(--blue-light);
+    }
+
+    .dot {
+      color: var(--blue-light);
+    }
+
+    /* Flash messages from Flask */
+    .messages {
+      width: min(700px, 90%);
+      margin: 20px auto 0;
+    }
+
+    .flash {
+      padding: 13px 16px;
+      margin-bottom: 10px;
+      border: 1px solid rgba(255, 190, 80, 0.6);
+      border-radius: 8px;
+      background: rgba(90, 53, 5, 0.85);
+      color: #fff1ce;
+    }
+
+    /* Tablet and mobile layout */
+    @media (max-width: 850px) {
+      .topbar {
+        justify-content: center;
+      }
+
+      .nav {
+        justify-content: center;
+        gap: 10px 22px;
+      }
+
+      .hero {
+        padding-top: 75px;
+        padding-bottom: 75px;
+      }
+
+      .features {
+        grid-template-columns: 1fr;
+        max-width: 600px;
+        margin-top: 0;
+      }
+
+      .feature-card {
+        min-height: 0;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .topbar {
+        padding: 15px;
+      }
+
+      .brand {
+        font-size: 22px;
+      }
+
+      .nav {
+        gap: 8px 18px;
+      }
+
+      .nav a {
+        font-size: 12px;
+      }
+
+      .hero {
+        padding: 65px 20px 75px;
+      }
+
+      .eyebrow {
+        font-size: 11px;
+        letter-spacing: 2px;
+      }
+
+      .hero-description {
+        font-size: 15px;
+      }
+
+      .primary-button {
+        width: 100%;
+        padding: 15px;
+      }
+
+      .features {
+        padding: 0 16px 40px;
+      }
+
+      .feature-card {
+        padding: 24px;
+      }
+
+      .footer {
+        justify-content: center;
+        text-align: center;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      *,
+      *::before,
+      *::after {
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="page-background" aria-hidden="true"></div>
+
+  <!-- Navigation -->
+  <header class="topbar">
+    <a class="brand" href="{{ url_for('home') }}" aria-label="Rainfall Alert home">
+      <svg class="brand-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M19.35 10.04A7.49 7.49 0 0 0 5.1 8.1 5.5 5.5 0 0 0 5.5 19H19a4.5 4.5 0 0 0 .35-8.96ZM8 20l-1 2h2l1-2H8Zm5 0-1 2h2l1-2h-2Zm5 0-1 2h2l1-2h-2Z"/>
+      </svg>
+      <div>Rainfall <span>Alert</span></div>
+    </a>
+
+    <nav class="nav" aria-label="Main navigation">
+      <a class="active" href="{{ url_for('home') }}">HOME</a>
+      <a href="{{ url_for('prediction_page') }}">PREDICT</a>
+      <a href="/history">HISTORY</a>
+      <a href="{{ url_for('logout') }}">LOGOUT</a>
+    </nav>
+  </header>
+
+  <!-- Flask flash messages -->
+  <div class="messages">
+    {% with messages = get_flashed_messages() %}
+      {% for message in messages %}
+        <div class="flash">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+  </div>
+
+  <!-- Hero section -->
+  <main>
+    <section class="hero">
+      <p class="welcome">
+        Welcome back, {{ username }}!
+      </p>
+
+      <p class="eyebrow">STAY INFORMED &nbsp;•&nbsp; STAY PREPARED</p>
+
+      <h1>Rainfall <span>Prediction</span></h1>
+
+      <p class="hero-description">
+        Get rainfall predictions for your selected location.
+        Plan ahead, stay prepared, and make better decisions with
+        live weather data and AI-powered predictions.
+      </p>
+
+      <a class="primary-button" href="{{ url_for('prediction_page') }}">
+        <svg class="button-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M19.35 10.04A7.49 7.49 0 0 0 5.1 8.1 5.5 5.5 0 0 0 5.5 19H19a4.5 4.5 0 0 0 .35-8.96ZM8 20l-1 2h2l1-2H8Zm5 0-1 2h2l1-2h-2Z"/>
+        </svg>
+        Start Predicting
+        <span aria-hidden="true">→</span>
+      </a>
+    </section>
+
+    <!-- Feature cards -->
+    <section class="features" aria-label="Project features">
+
+      <article class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M19.35 10.04A7.49 7.49 0 0 0 5.1 8.1 5.5 5.5 0 0 0 5.5 19H19a4.5 4.5 0 0 0 .35-8.96ZM8 20l-1 2h2l1-2H8Zm5 0-1 2h2l1-2h-2Z"/>
+          </svg>
+        </div>
+        <h2>Live Weather Data</h2>
+        <p>
+          Get current temperature, humidity, pressure, wind speed,
+          and cloud cover for the location you select.
+        </p>
+        <a class="learn-more" href="{{ url_for('prediction_page') }}">
+          Check a place <span aria-hidden="true">→</span>
+        </a>
+      </article>
+
+      <article class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+               aria-hidden="true">
+            <path d="M12 3a3 3 0 0 0-3 3v1a3 3 0 0 0-3 3v1a3 3 0 0 0 0 6v1a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z"/>
+            <path d="M12 3a3 3 0 0 1 3 3v1a3 3 0 0 1 3 3v1a3 3 0 0 1 0 6v1a3 3 0 0 1-6 0"/>
+            <path d="M8 10h1m-1 4h1m6-4h1m-1 4h1"/>
+          </svg>
+        </div>
+        <h2>AI Powered</h2>
+        <p>
+          Your trained artificial neural network uses weather features
+          to estimate rainfall in millimetres.
+        </p>
+        <a class="learn-more" href="{{ url_for('prediction_page') }}">
+          Try prediction <span aria-hidden="true">→</span>
+        </a>
+      </article>
+
+      <article class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="1.8" stroke-linecap="round"
+               stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/>
+            <path d="M10 21h4"/>
+          </svg>
+        </div>
+        <h2>Custom Alerts</h2>
+        <p>
+          Set your own rainfall alert limit and see a warning when
+          your predicted rainfall reaches or exceeds that limit.
+        </p>
+        <a class="learn-more" href="{{ url_for('prediction_page') }}">
+          Set my limit <span aria-hidden="true">→</span>
+        </a>
+      </article>
+
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-left">
+      <svg class="footer-icon" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M20 16.5A4.5 4.5 0 0 0 19 7.6a7 7 0 0 0-13.4 1.9A4 4 0 0 0 6 17.5h13"/>
+      </svg>
+      <span>Rainfall Prediction</span>
+      <span class="dot">•</span>
+      <span>Accurate</span>
+      <span class="dot">•</span>
+      <span>Global</span>
+    </div>
+
+    <div class="footer-right">
+      <span>Weather data powered by Open-Meteo</span>
+    </div>
+  </footer>
+
+</body>
+</html>

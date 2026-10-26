@@ -1,0 +1,24 @@
+﻿# Python cache files
+__pycache__/
+*.py[cod]
+
+# Virtual environment and editor settings
+.venv/
+venv/
+.vscode/
+
+# Secrets
+.env
+
+# Local databases
+database/*.db
+database/*.sqlite
+database/*.sqlite3
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+
+data/worldcities.csv

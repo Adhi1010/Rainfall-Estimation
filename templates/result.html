@@ -1,0 +1,410 @@
+
+{% extends "base.html" %}
+
+{% block title %}Prediction Result | Rainfall Prediction{% endblock %}
+
+{% block content %}
+
+<style>
+    .result-wrapper {
+        max-width: 850px;
+        margin: 20px auto;
+        padding: 10px;
+    }
+
+    .result-card {
+        overflow: hidden;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 22px;
+        box-shadow: 0 18px 50px rgba(30, 64, 175, 0.10);
+    }
+
+    .result-header {
+        padding: 32px 24px;
+        text-align: center;
+        color: white;
+        background: linear-gradient(135deg, #1d4ed8, #0891b2);
+    }
+
+    .result-icon {
+        font-size: 44px;
+        margin-bottom: 10px;
+    }
+
+    .result-header h1 {
+        margin: 0;
+        font-size: 30px;
+        font-weight: 800;
+    }
+
+    .result-header p {
+        margin: 10px 0 0;
+        color: #e0f2fe;
+        font-size: 14px;
+    }
+
+    .result-body {
+        padding: 26px;
+    }
+
+    .location-box {
+        padding: 16px;
+        margin-bottom: 24px;
+        border: 1px solid #dbeafe;
+        border-radius: 14px;
+        background: #eff6ff;
+    }
+
+    .location-title {
+        margin-bottom: 7px;
+        color: #1e40af;
+        font-size: 12px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .location-name {
+        color: #0f172a;
+        font-size: 19px;
+        font-weight: 700;
+        overflow-wrap: anywhere;
+    }
+
+    .coordinates {
+        margin-top: 6px;
+        color: #64748b;
+        font-size: 13px;
+        overflow-wrap: anywhere;
+    }
+
+    .rainfall-box {
+        padding: 28px 16px;
+        margin-bottom: 22px;
+        text-align: center;
+        border: 1px solid #bfdbfe;
+        border-radius: 18px;
+        background: linear-gradient(135deg, #eff6ff, #ecfeff);
+    }
+
+    .rainfall-label {
+        color: #475569;
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+    }
+
+    .rainfall-number {
+        margin: 12px 0;
+        color: #1d4ed8;
+        font-size: clamp(42px, 9vw, 66px);
+        line-height: 1.1;
+        font-weight: 900;
+        overflow-wrap: anywhere;
+    }
+
+    .rainfall-number span {
+        font-size: 25px;
+        font-weight: 700;
+    }
+
+    .rainfall-note {
+        color: #64748b;
+        font-size: 13px;
+    }
+
+    .section-title {
+        margin: 28px 0 15px;
+        color: #0f172a;
+        font-size: 19px;
+        font-weight: 800;
+    }
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+    }
+
+    .summary-item {
+        padding: 17px;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        background: #f8fafc;
+    }
+
+    .summary-item .item-label {
+        margin-bottom: 8px;
+        color: #64748b;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .summary-item .item-value {
+        color: #0f172a;
+        font-size: 17px;
+        font-weight: 800;
+        overflow-wrap: anywhere;
+    }
+
+    .alert-box {
+        padding: 18px;
+        margin-top: 24px;
+        border-radius: 14px;
+        line-height: 1.6;
+    }
+
+    .alert-box h3 {
+        margin: 0 0 7px;
+        font-size: 16px;
+    }
+
+    .alert-box p {
+        margin: 0;
+        font-size: 14px;
+    }
+
+    .alert-warn {
+        color: #92400e;
+        background: #fef3c7;
+        border: 1px solid #fcd34d;
+    }
+
+    .alert-ok {
+        color: #166534;
+        background: #dcfce7;
+        border: 1px solid #86efac;
+    }
+
+    .weather-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .weather-item {
+        padding: 16px 10px;
+        text-align: center;
+        border: 1px solid #e2e8f0;
+        border-radius: 13px;
+        background: #ffffff;
+    }
+
+    .weather-icon {
+        margin-bottom: 8px;
+        font-size: 26px;
+    }
+
+    .weather-label {
+        color: #64748b;
+        font-size: 12px;
+    }
+
+    .weather-value {
+        margin-top: 6px;
+        color: #0f172a;
+        font-size: 16px;
+        font-weight: 800;
+        overflow-wrap: anywhere;
+    }
+
+    .result-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 28px;
+    }
+
+    .result-button {
+        flex: 1;
+        min-width: 180px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 14px 18px;
+        border-radius: 11px;
+        text-align: center;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 800;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .result-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 18px rgba(30, 64, 175, 0.13);
+    }
+
+    .primary-button {
+        color: white;
+        background: linear-gradient(135deg, #2563eb, #0891b2);
+    }
+
+    .secondary-button {
+        color: #1d4ed8;
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+    }
+
+    .result-footer {
+        margin-top: 22px;
+        color: #94a3b8;
+        font-size: 12px;
+        text-align: center;
+        line-height: 1.6;
+    }
+
+    @media (max-width: 560px) {
+        .result-body {
+            padding: 18px;
+        }
+
+        .result-header {
+            padding: 26px 16px;
+        }
+
+        .result-header h1 {
+            font-size: 25px;
+        }
+
+        .weather-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .summary-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="result-wrapper">
+    <div class="result-card">
+
+        <div class="result-header">
+            <div class="result-icon">🌧️</div>
+            <h1>Prediction Result</h1>
+            <p>Your rainfall prediction and current weather summary</p>
+        </div>
+
+        <div class="result-body">
+
+            <div class="location-box">
+                <div class="location-title">📍 Selected Location</div>
+                <div class="location-name">{{ place_name }}</div>
+                <div class="coordinates">
+                    Coordinates: {{ lat }}, {{ lon }}
+                </div>
+            </div>
+
+            <div class="rainfall-box">
+                <div class="rainfall-label">Predicted Rainfall</div>
+                <div class="rainfall-number">
+                    {{ mm }} <span>mm</span>
+                </div>
+                <div class="rainfall-note">
+                    Estimated rainfall from your prediction model
+                </div>
+            </div>
+
+            <h2 class="section-title">📊 Prediction Summary</h2>
+
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="item-label">🌦️ Rainfall Status</div>
+                    <div class="item-value">{{ status }}</div>
+                </div>
+
+                <div class="summary-item">
+                    <div class="item-label">📈 Rainfall Level</div>
+                    <div class="item-value">{{ level }}</div>
+                </div>
+            </div>
+
+            <div class="alert-box {{ 'alert-warn' if is_alert else 'alert-ok' }}">
+                <h3>
+                    {% if is_alert %}
+                        ⚠️ Weather Alert
+                    {% else %}
+                        ✅ Weather Update
+                    {% endif %}
+                </h3>
+                <p>{{ alert_text }}</p>
+            </div>
+
+            <h2 class="section-title">🌤️ Weather Data Used</h2>
+
+            <div class="weather-grid">
+                <div class="weather-item">
+                    <div class="weather-icon">🌡️</div>
+                    <div class="weather-label">Temperature</div>
+                    <div class="weather-value">
+                        {{ weather.temperature }} °C
+                    </div>
+                </div>
+
+                <div class="weather-item">
+                    <div class="weather-icon">💧</div>
+                    <div class="weather-label">Humidity</div>
+                    <div class="weather-value">
+                        {{ weather.humidity }} %
+                    </div>
+                </div>
+
+                <div class="weather-item">
+                    <div class="weather-icon">🧭</div>
+                    <div class="weather-label">Pressure</div>
+                    <div class="weather-value">
+                        {{ weather.pressure }} hPa
+                    </div>
+                </div>
+
+                <div class="weather-item">
+                    <div class="weather-icon">💨</div>
+                    <div class="weather-label">Wind Speed</div>
+                    <div class="weather-value">
+                        {{ weather.wind_speed }} km/h
+                    </div>
+                </div>
+
+                <div class="weather-item">
+                    <div class="weather-icon">☁️</div>
+                    <div class="weather-label">Cloud Cover</div>
+                    <div class="weather-value">
+                        {{ weather.cloud_cover }} %
+                    </div>
+                </div>
+
+                <div class="weather-item">
+                    <div class="weather-icon">🌧️</div>
+                    <div class="weather-label">Predicted Amount</div>
+                    <div class="weather-value">{{ mm }} mm</div>
+                </div>
+            </div>
+
+            <div class="result-actions">
+                <a class="result-button primary-button"
+                   href="{{ url_for('prediction_page') }}">
+                    🔄 Predict Again
+                </a>
+
+                <a class="result-button secondary-button"
+                   href="{{ url_for('home') }}">
+                    🏠 Back to Home
+                </a>
+            </div>
+
+            <div class="result-footer">
+                Rainfall Prediction System · Model-generated estimate
+                <br>
+                Predictions are estimates and may differ from actual weather.
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

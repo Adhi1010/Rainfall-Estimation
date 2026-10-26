@@ -1,0 +1,363 @@
+{% extends "base.html" %}
+{% block title %}Rainfall Prediction{% endblock %}
+
+{% block content %}
+<style>
+  .hero {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    padding: clamp(36px, 7vw, 82px) 28px;
+    border-radius: 24px;
+    text-align: center;
+    color: white;
+    background: linear-gradient(135deg, #06283d, #065a82 55%, #168aad);
+    box-shadow: 0 18px 45px rgba(6, 90, 130, .2);
+  }
+
+  .rain {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    z-index: -1;
+    pointer-events: none;
+    opacity: .55;
+  }
+
+  .rain i {
+    position: absolute;
+    top: -35px;
+    width: 2px;
+    height: 30px;
+    background: linear-gradient(transparent, #bdeeff);
+    border-radius: 5px;
+    animation: rainfall linear infinite;
+  }
+
+  @keyframes rainfall {
+    to { transform: translate3d(-35px, 650px, 0); }
+  }
+
+  .hero-content {
+    position: relative;
+    max-width: 780px;
+    margin: auto;
+  }
+
+  .eyebrow {
+    display: inline-block;
+    padding: 8px 14px;
+    margin-bottom: 18px;
+    border: 1px solid #ffffff55;
+    border-radius: 30px;
+    background: #ffffff15;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  .hero h1 {
+    margin: 0 auto 18px;
+    max-width: 760px;
+    font-size: clamp(34px, 6vw, 58px);
+    line-height: 1.1;
+    letter-spacing: -1.5px;
+  }
+
+  .hero .lead {
+    max-width: 680px;
+    margin: 0 auto;
+    color: #e0f5ff;
+    font-size: 16px;
+    line-height: 1.8;
+  }
+
+  .hero-actions {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 30px;
+  }
+
+  .hero .btn {
+    display: inline-block;
+    padding: 14px 23px;
+    border-radius: 10px;
+    background: white;
+    color: #065a82;
+    text-decoration: none;
+    font-weight: 700;
+    transition: transform .2s, box-shadow .2s;
+  }
+
+  .hero .btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px #001c2b55;
+  }
+
+  .hero .btn-outline {
+    border: 1px solid #ffffff88;
+    background: #ffffff12;
+    color: white;
+  }
+
+  .section {
+    margin-top: 28px;
+    padding: clamp(22px, 4vw, 34px);
+    border: 1px solid #e6edf2;
+    border-radius: 18px;
+    background: white;
+    box-shadow: 0 7px 24px #12304708;
+  }
+
+  .section h2 {
+    margin: 0 0 10px;
+    color: #123047;
+    font-size: clamp(23px, 3vw, 30px);
+  }
+
+  .section-intro {
+    margin: 0 0 24px;
+    color: #647789;
+    line-height: 1.7;
+  }
+
+  .section-note {
+    margin: 16px 0 0;
+    font-size: 13px;
+    color: #647789;
+    line-height: 1.7;
+  }
+
+  .steps, .facts {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  .steps li, .facts li {
+    padding: 22px;
+    border: 1px solid #e4edf3;
+    border-radius: 14px;
+    background: linear-gradient(160deg, #f8fcff, #ffffff);
+    line-height: 1.65;
+    color: #647789;
+  }
+
+  .step-icon {
+    display: block;
+    margin-bottom: 14px;
+    font-size: 30px;
+  }
+
+  .steps b, .facts b {
+    display: block;
+    margin-bottom: 7px;
+    color: #123047;
+    font-size: 16px;
+  }
+
+  .levels {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .level {
+    padding: 17px;
+    border-radius: 12px;
+    background: #f4f8fb;
+    line-height: 1.6;
+    color: #52697a;
+  }
+
+  .level b {
+    display: block;
+    margin-bottom: 5px;
+    color: #123047;
+  }
+
+  .level-dot {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    margin-right: 6px;
+    border-radius: 50%;
+  }
+
+  .dot-light { background: #36a3d9; }
+  .dot-moderate { background: #e8b949; }
+  .dot-heavy { background: #e16b55; }
+
+  .cta {
+    margin-top: 28px;
+    padding: 32px 20px;
+    border-radius: 18px;
+    text-align: center;
+    background: #e7f5fb;
+  }
+
+  .cta h2 {
+    margin: 0 0 10px;
+    color: #123047;
+  }
+
+  .cta p {
+    color: #5b6b79;
+    line-height: 1.7;
+  }
+
+  .cta .btn {
+    display: inline-block;
+    padding: 13px 24px;
+    border-radius: 9px;
+    background: #065a82;
+    color: white;
+    text-decoration: none;
+    font-weight: 700;
+  }
+
+  @media (max-width: 720px) {
+    .steps, .facts, .levels {
+      grid-template-columns: 1fr;
+    }
+
+    .hero { border-radius: 16px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .rain i { animation: none; }
+    .hero .btn { transition: none; }
+  }
+</style>
+
+<section class="hero">
+  <div class="rain" aria-hidden="true">
+    {% for n in range(28) %}
+      <i data-n="{{ n }}"></i>
+    {% endfor %}
+  </div>
+
+  <div class="hero-content">
+    <span class="eyebrow">🌦 Smart Weather Insights</span>
+    <h1>Know how much rain is coming.</h1>
+    <p class="lead">
+      Make smarter plans with rainfall predictions in millimetres.
+      Choose a location, explore the predicted rainfall level, and
+      prepare for your day with greater confidence.
+    </p>
+
+    <div class="hero-actions">
+      {% if session.get('logged_in') %}
+        <a class="btn" href="{{ url_for('home') }}">☔ Predict Rainfall →</a>
+      {% else %}
+        <a class="btn" href="{{ url_for('login') }}">☔ Get Started →</a>
+        <a class="btn btn-outline" href="{{ url_for('register') }}">Create Account</a>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <h2>How it works</h2>
+  <p class="section-intro">
+    Get a rainfall estimate in three simple steps.
+  </p>
+
+  <ol class="steps">
+    <li>
+      <span class="step-icon">🔐</span>
+      <b>1. Sign in</b>
+      Create your account and log in securely to access the prediction tool.
+    </li>
+    <li>
+      <span class="step-icon">📍</span>
+      <b>2. Choose a location</b>
+      Select a country, state or region, and city for your prediction.
+    </li>
+    <li>
+      <span class="step-icon">🌧️</span>
+      <b>3. Explore your result</b>
+      View the estimated rainfall in millimetres and its rainfall category.
+    </li>
+  </ol>
+</section>
+
+<section class="section">
+  <h2>What you get</h2>
+  <p class="section-intro">
+    Clear information to help you make more informed plans.
+  </p>
+
+  <ul class="facts">
+    <li>
+      <span class="step-icon">📊</span>
+      <b>Rainfall in millimetres</b>
+      Understand the predicted amount of rainfall for your selected location.
+    </li>
+    <li>
+      <span class="step-icon">🌦️</span>
+      <b>A simple rainfall rating</b>
+      Read the predicted level at a glance, from no rain to extremely heavy rain.
+    </li>
+    <li>
+      <span class="step-icon">🌱</span>
+      <b>Plan ahead</b>
+      Use the estimate as one source of information when planning travel,
+      farming, and outdoor activities.
+    </li>
+  </ul>
+</section>
+
+<section class="section">
+  <h2>Understanding rainfall levels</h2>
+  <p class="section-intro">
+    These categories provide a quick guide to the predicted rainfall amount.
+  </p>
+
+  <div class="levels">
+    <div class="level">
+      <b><span class="level-dot dot-light"></span>Light</b>
+      Relatively small amounts of rainfall.
+    </div>
+    <div class="level">
+      <b><span class="level-dot dot-moderate"></span>Moderate</b>
+      Consider carrying an umbrella and planning around the weather.
+    </div>
+    <div class="level">
+      <b><span class="level-dot dot-heavy"></span>Heavy</b>
+      Consider precautions for travel and possible waterlogging.
+    </div>
+  </div>
+  <p class="section-note">
+    Categories are indicative. Actual rainfall and local impacts can vary.
+    Check official weather alerts for safety-critical decisions.
+  </p>
+</section>
+
+<section class="cta">
+  <h2>Ready to check your location?</h2>
+  <p>Start a rainfall prediction in just a few steps.</p>
+  {% if session.get('logged_in') %}
+    <a class="btn" href="{{ url_for('home') }}">Predict Rainfall →</a>
+  {% else %}
+    <a class="btn" href="{{ url_for('register') }}">Create Your Account →</a>
+  {% endif %}
+</section>
+
+<script>
+  // Position each raindrop here instead of using Jinja inside a style
+  // attribute, which the editor's CSS checker misreads as errors.
+  document.querySelectorAll('.rain i').forEach(function (drop) {
+    var n = Number(drop.dataset.n);
+    drop.style.left = ((n * 37) % 100) + '%';
+    drop.style.animationDelay = '-' + ((n * 0.37) % 2.6).toFixed(2) + 's';
+    drop.style.animationDuration = (2 + (n % 5) * 0.3) + 's';
+  });
+</script>
+{% endblock %}

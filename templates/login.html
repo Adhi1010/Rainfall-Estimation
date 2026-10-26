@@ -1,0 +1,234 @@
+
+{% extends "base.html" %}
+
+{% block title %}Login | Rainfall Prediction{% endblock %}
+
+{% block content %}
+
+<style>
+    .login-wrapper {
+        min-height: 75vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 35px 16px;
+        background:
+            radial-gradient(circle at top left, #dbeafe, transparent 45%),
+            radial-gradient(circle at bottom right, #cffafe, transparent 40%);
+        border-radius: 20px;
+    }
+
+    .login-card {
+        width: 100%;
+        max-width: 440px;
+        padding: 36px;
+        background: rgba(255, 255, 255, 0.96);
+        border: 1px solid #e2e8f0;
+        border-radius: 22px;
+        box-shadow: 0 20px 55px rgba(30, 64, 175, 0.13);
+        box-sizing: border-box;
+    }
+
+    .weather-icon {
+        width: 76px;
+        height: 76px;
+        margin: 0 auto 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 39px;
+        background: linear-gradient(135deg, #dbeafe, #cffafe);
+        border-radius: 24px;
+    }
+
+    .login-heading {
+        margin: 0;
+        color: #0f172a;
+        text-align: center;
+        font-size: 30px;
+        font-weight: 800;
+        letter-spacing: -0.7px;
+    }
+
+    .login-subtitle {
+        margin: 10px 0 28px;
+        text-align: center;
+        color: #64748b;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .login-card label {
+        display: block;
+        margin: 18px 0 8px;
+        color: #334155;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .login-card input {
+        display: block;
+        width: 100%;
+        padding: 13px 14px;
+        box-sizing: border-box;
+        border: 1px solid #cbd5e1;
+        border-radius: 11px;
+        background: #f8fafc;
+        color: #0f172a;
+        font-size: 15px;
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .login-card input:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+        background: #fff;
+    }
+
+    .login-submit {
+        width: 100%;
+        margin-top: 25px;
+        padding: 14px;
+        border: none;
+        border-radius: 11px;
+        background: linear-gradient(135deg, #2563eb, #0891b2);
+        color: white;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .login-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 22px rgba(37, 99, 235, 0.25);
+    }
+
+    .login-message {
+        padding: 12px 14px;
+        margin: 16px 0;
+        border-radius: 10px;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    .login-message.success {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .login-message.error {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .register-prompt {
+        margin: 24px 0 10px;
+        color: #64748b;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    .register-link {
+        display: block;
+        padding: 12px;
+        border: 1px solid #bfdbfe;
+        border-radius: 11px;
+        color: #1d4ed8;
+        background: #eff6ff;
+        text-align: center;
+        text-decoration: none;
+        font-weight: 700;
+        transition: background 0.2s;
+    }
+
+    .register-link:hover {
+        background: #dbeafe;
+    }
+
+    .login-footer {
+        margin-top: 22px;
+        color: #94a3b8;
+        text-align: center;
+        font-size: 12px;
+    }
+
+    @media (max-width: 480px) {
+        .login-card {
+            padding: 26px 20px;
+        }
+
+        .login-heading {
+            font-size: 26px;
+        }
+    }
+</style>
+
+<div class="login-wrapper">
+    <div class="login-card">
+
+        <div class="weather-icon">🌦️</div>
+
+        <h1 class="login-heading">Welcome Back!</h1>
+
+        <p class="login-subtitle">
+            Log in to your account and discover your rainfall predictions.
+        </p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div
+                    role="alert"
+                    class="login-message {{ 'success' if category == 'success' else 'error' }}"
+                >
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('login') }}">
+
+            <label for="username">Username or email</label>
+            <input
+                id="username"
+                name="username"
+                type="text"
+                placeholder="Enter your username or email"
+                required
+                autocomplete="username"
+                autofocus
+            >
+
+            <label for="password">Password</label>
+            <input
+                id="password"
+                name="password"
+                type="password"
+                placeholder="Enter your password"
+                required
+                autocomplete="current-password"
+            >
+
+            <button class="login-submit" type="submit">
+                Log In &nbsp; →
+            </button>
+
+        </form>
+
+        <p class="register-prompt">
+            Don't have an account yet?
+        </p>
+
+        <a class="register-link" href="{{ url_for('register') }}">
+            Create Your Account
+        </a>
+
+        <div class="login-footer">
+            ☁️ Rainfall Prediction System
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

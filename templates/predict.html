@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+{% block title %}Select Location — Rainfall Prediction{% endblock %}
+
+{% block content %}
+<style>
+.location-card {
+  max-width: 650px;
+  margin: 35px auto;
+  padding: 30px;
+  background: white;
+  border-radius: 18px;
+  box-shadow: 0 8px 28px #12304715;
+}
+.location-card h2 { color: #075985; }
+.location-card label {
+  display: block;
+  margin: 18px 0 7px;
+  font-weight: bold;
+}
+.location-card select,
+.location-card input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: white;
+  box-sizing: border-box;
+}
+.location-card button {
+  width: 100%;
+  margin-top: 24px;
+  padding: 14px;
+  border: 0;
+  border-radius: 8px;
+  background: #075985;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+.location-card button:disabled {
+  opacity: .6;
+  cursor: wait;
+}
+#message { margin-top: 15px; color: #b91c1c; }
+</style>
+
+<div class="location-card">
+  <h2>🌧️ Predict Rainfall</h2>
+  <p>Select a country, state/region and district or city.</p>
+
+  <form method="POST" action="{{ url_for('predict') }}" id="predictionForm">
+    <label for="country">Country</label>
+    <select id="country" required>
+      <option value="">Loading countries...</option>
+    </select>
+
+    <label for="state">Region / State</label>
+    <select id="state" disabled>
+      <option value="">Select a country first</option>
+    </select>
+
+    <label for="city">District / City</label>
+    <select id="city" name="city_id" required disabled>
+      <option value="">Select a state first</option>
+    </select>
+
+    <label for="threshold">Rainfall alert limit (mm)</label>
+    <input id="threshold" name="threshold"
+           type="number" min="0" step="0.1" value="10" required>
+
+    <p id="message" role="status"></p>
+    <button id="submitBtn" type="submit" disabled>
+      Predict Rainfall
+    </button>
+  </form>
+</div>
+
+<script>
+const countrySelect = document.getElementById("country");
+const stateSelect = document.getElementById("state");
+const citySelect = document.getElementById("city");
+const message = document.getElementById("message");
+const submitBtn = document.getElementById("submitBtn");
+
+// Counters so a slow, older response never overwrites a newer one.
+let stateRequestId = 0;
+let cityRequestId = 0;
+
+function setOptions(select, placeholder, items) {
+  select.replaceChildren(new Option(placeholder, ""));
+  items.forEach(item => {
+    select.add(new Option(item.label, item.value));
+  });
+}
+
+async function getJSON(url) {
+  const response = await fetch(url);
+  if (!response.ok) throw new Error("Request failed: " + response.status);
+  return await response.json();
+}
+
+async function loadCountries() {
+  try {
+    const countries = await getJSON("/api/countries");
+    setOptions(countrySelect, "Choose a country", countries);
+    message.textContent = countries.length
+      ? ""
+      : "No countries found. Check worldcities.csv.";
+  } catch (error) {
+    setOptions(countrySelect, "Could not load countries", []);
+    message.textContent =
+      "Could not load countries. Check that you are logged in and Flask is running.";
+  }
+}
+
+async function loadStates() {
+  const myId = ++stateRequestId;
+  ++cityRequestId;                       // cancel any pending city request
+
+  const country = countrySelect.value;
+  setOptions(stateSelect, "Loading regions...", []);
+  setOptions(citySelect, "Select a region or all cities", []);
+  stateSelect.disabled = true;
+  citySelect.disabled = true;
+  submitBtn.disabled = true;
+  message.textContent = "";
+
+  if (!country) {
+    setOptions(stateSelect, "Choose a country first", []);
+    return;
+  }
+
+  try {
+    const states = await getJSON(
+      "/api/states?country=" + encodeURIComponent(country)
+    );
+
+    if (myId !== stateRequestId) return;  // a newer request replaced this one
+
+    // The placeholder is the "all regions" option (empty value), so the
+    // list must NOT contain it a second time.
+    setOptions(stateSelect, "All regions / states", states);
+    stateSelect.disabled = false;
+    await loadCities();
+  } catch (error) {
+    if (myId !== stateRequestId) return;
+    setOptions(stateSelect, "Could not load regions", []);
+    message.textContent = "Could not load regions. Check the Flask terminal.";
+  }
+}
+
+async function loadCities() {
+  const myId = ++cityRequestId;
+
+  const country = countrySelect.value;
+  const state = stateSelect.value;
+
+  setOptions(citySelect, "Loading cities...", []);
+  citySelect.disabled = true;
+  submitBtn.disabled = true;
+  message.textContent = "";
+
+  if (!country) {
+    setOptions(citySelect, "Choose a country first", []);
+    return;
+  }
+
+  try {
+    const url = "/api/cities?country=" + encodeURIComponent(country)
+      + "&state=" + encodeURIComponent(state);
+
+    const cities = await getJSON(url);
+
+    if (myId !== cityRequestId) return;   // a newer request replaced this one
+
+    setOptions(citySelect, "Choose a city", cities);
+    citySelect.disabled = false;
+
+    if (!cities.length) {
+      message.textContent =
+        "No cities found for this selection. Try All regions / states.";
+    }
+  } catch (error) {
+    if (myId !== cityRequestId) return;
+    setOptions(citySelect, "Could not load cities", []);
+    message.textContent = "Could not load cities. Check the Flask terminal.";
+  }
+}
+
+countrySelect.addEventListener("change", loadStates);
+stateSelect.addEventListener("change", loadCities);
+
+citySelect.addEventListener("change", () => {
+  submitBtn.disabled = !citySelect.value;
+});
+
+document.getElementById("predictionForm").addEventListener("submit", event => {
+  if (!citySelect.value) {
+    event.preventDefault();
+    message.textContent = "Please select a city.";
+  }
+});
+
+loadCountries();
+</script>
+{% endblock %}
